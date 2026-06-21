@@ -11,6 +11,14 @@ pub struct InvoiceInfo {
     pub is_reimbursement: bool,
     pub page_number: i32,
     pub original_file: String,
+    #[serde(default)]
+    pub reimburser: String,
+    #[serde(default)]
+    pub project_code: String,
+    #[serde(default)]
+    pub page_type: String,
+    #[serde(default)]
+    pub page_action: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -49,6 +57,30 @@ pub struct LogEntry {
     pub message: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PageClassification {
+    pub page_number: i32,
+    pub original_file: String,
+    pub page_type: String,
+    pub page_action: String,
+    pub confidence: f64,
+    pub info: InvoiceInfo,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct NamingPreview {
+    pub template: String,
+    pub file_name: String,
+    pub warnings: Vec<NamingWarning>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct NamingWarning {
+    pub warning_type: String,
+    pub message: String,
+    pub field: Option<String>,
+}
+
 pub mod invoice;
 pub mod pdf_utils;
 pub mod commands;
@@ -61,6 +93,9 @@ pub fn run() {
             commands::process_invoices,
             commands::get_pdf_info,
             commands::split_pdf,
+            commands::classify_pdf_pages,
+            commands::batch_split_confirmed,
+            commands::preview_file_names,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
